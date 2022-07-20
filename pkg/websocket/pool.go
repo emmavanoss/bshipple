@@ -11,6 +11,7 @@ type Pool struct {
 	GameStateChange chan Message
 	Players         []*Player
 	PlayerReady    chan PlayerReadyMessage
+	PlayerFire    chan PlayerFireMessage
 	Register        chan *Player
 }
 
@@ -18,7 +19,8 @@ func NewPool() *Pool {
 	return &Pool{
 		GameStateChange: make(chan Message),
 		Players:         make([]*Player, 0, 2), // current length 0, max capacity 2
-		PlayerReady:    make(chan PlayerReadyMessage),
+		PlayerReady:     make(chan PlayerReadyMessage),
+		PlayerFire:      make(chan PlayerFireMessage),
 		Register:        make(chan *Player),
 	}
 }
@@ -42,9 +44,16 @@ func (pool *Pool) Start() {
             go newPlayer.Read()
 			break
 		case message := <-pool.PlayerReady:
-			fmt.Println("Handing PlayerReady")
+			fmt.Println("Handling PlayerReady")
 
-			// TODO pass player action to GameState
+			// TODO pass to GameState
+			log.Println(message)
+
+			break
+		case message := <-pool.PlayerFire:
+			fmt.Println("Handling PlayerFire")
+
+			// TODO pass to GameState
 			log.Println(message)
 
 			break

@@ -15,7 +15,7 @@
 
             socket.onopen = () => {
                     console.log("Successfully Connected");
-                    socket.send(JSON.stringify({Message: "start", PlayerId: "123abc", BattleShips: [[1, 2], [1, 3]]}));
+                    socket.send(JSON.stringify({Message: "fire", Coordinate: [1, 2]}));
                   }
 
             socket.onclose = event => {

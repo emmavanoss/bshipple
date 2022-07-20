@@ -25,7 +25,6 @@ func wsEndpoint(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 		Pool: pool,
 	}
 
-	// TODO when pool is full
 	pool.Register <- player
 }
 

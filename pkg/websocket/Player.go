@@ -20,18 +20,22 @@ type PlayerReadyMessage struct {
   Locations []gamestate.Location
 }
 
+type PlayerFireMessage struct {
+  Player *Player
+  Coordinates gamestate.Location
+}
+
 type Message struct {
   Type int
   Body string
 }
 
-type StartInput struct {
+type Input struct {
   Message string
   PlayerId string
   Battleships [][]int
+  Coordinate []int
 }
-
-
 
 // Read from the websocket & broadcast to PlayerAction channel
 func (c *Player) Read() {
@@ -48,11 +52,12 @@ func (c *Player) Read() {
 			return
 		}
 
-        // TODO more than just start input is possible
-        var decodedBody StartInput
+        // decode the JSON
+        var decodedBody Input
         err = json.Unmarshal(p, &decodedBody)
 
-        if decodedBody.Message == "start" {
+        switch decodedBody.Message {
+        case "start":
           c.ID = decodedBody.PlayerId
 
           locations := make([]gamestate.Location, 2)
@@ -63,6 +68,13 @@ func (c *Player) Read() {
           message := PlayerReadyMessage{Player: c, Locations: locations}
           c.Pool.PlayerReady <- message
           // pp.Print(message)
+        case "fire":
+          coordinates := gamestate.Location{X: decodedBody.Coordinate[0], Y: decodedBody.Coordinate[1]}
+
+          message := PlayerFireMessage{Player: c, Coordinates: coordinates}
+          c.Pool.PlayerFire <- message
+        default:
+          return
         }
 
         // TODO  fire

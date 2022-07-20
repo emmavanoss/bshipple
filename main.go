@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"shipple/bshipple/pkg/websocket"
+	// "shipple/bshipple/pkg/gamestate"
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {

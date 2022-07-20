@@ -1,10 +1,12 @@
 package websocket
 
 import (
-	"fmt"
 	"log"
+    "encoding/json"
 
 	"github.com/gorilla/websocket"
+    "shipple/bshipple/pkg/gamestate"
+    // "github.com/k0kubun/pp"
 )
 
 type Player struct {
@@ -13,10 +15,23 @@ type Player struct {
 	Pool *Pool
 }
 
-type Message struct {
-	Type int    `json:"type"`
-	Body string `json:"body"`
+type PlayerReadyMessage struct {
+  Player *Player
+  Locations []gamestate.Location
 }
+
+type Message struct {
+  Type int
+  Body string
+}
+
+type StartInput struct {
+  Message string
+  PlayerId string
+  Battleships [][]int
+}
+
+
 
 // Read from the websocket & broadcast to PlayerAction channel
 func (c *Player) Read() {
@@ -27,15 +42,28 @@ func (c *Player) Read() {
 
 	for {
 		// receive message from the websocket connection
-		messageType, p, err := c.Conn.ReadMessage()
+		_, p, err := c.Conn.ReadMessage()
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		// send message to the PlayerAction channel
-		message := Message{Type: messageType, Body: string(p)}
-		c.Pool.PlayerAction <- message
-		fmt.Printf("Message Received: %+v\n", message)
+        // TODO more than just start input is possible
+        var decodedBody StartInput
+        err = json.Unmarshal(p, &decodedBody)
+
+        if decodedBody.Message == "start" {
+          c.ID = decodedBody.PlayerId
+
+          locations := make([]gamestate.Location, 2)
+          locations[0] = gamestate.Location{X: decodedBody.Battleships[0][0], Y: decodedBody.Battleships[0][1]}
+          locations[1] = gamestate.Location{X: decodedBody.Battleships[1][0], Y: decodedBody.Battleships[0][1]}
+
+          // send player and locations to the PlayerStart channel
+          message := PlayerReadyMessage{Player: c, Locations: locations}
+          c.Pool.PlayerReady <- message
+        }
+
+        // TODO  fire
 	}
 }

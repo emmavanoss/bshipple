@@ -62,6 +62,7 @@ func (c *Player) Read() {
           // send player and locations to the PlayerStart channel
           message := PlayerReadyMessage{Player: c, Locations: locations}
           c.Pool.PlayerReady <- message
+          // pp.Print(message)
         }
 
         // TODO  fire

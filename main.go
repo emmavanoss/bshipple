@@ -27,7 +27,6 @@ func wsEndpoint(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 
 	// TODO when pool is full
 	pool.Register <- player
-	player.Read()
 }
 
 func setupRoutes() {

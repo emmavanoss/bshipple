@@ -28,14 +28,18 @@ func (pool *Pool) Start() {
 	for {
 		select {
 		case newPlayer := <-pool.Register:
+            if len(pool.Players) >= 2 {
+              fmt.Println("Pool is full no more players in the pool")
+              break
+            }
+
 			fmt.Println("Registering new player to the pool")
-			// TODO if len(Players) == 2, pool is full - return error?
 
 			// Add new player to the pool
 			pool.Players = append(pool.Players, newPlayer)
-
 			fmt.Println("Number of players", len(pool.Players))
 
+            go newPlayer.Read()
 			break
 		case message := <-pool.PlayerReady:
 			fmt.Println("Handing PlayerReady")

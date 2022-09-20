@@ -3,15 +3,17 @@ package websocket
 import (
 	"fmt"
 	"log"
+    "shipple/bshipple/pkg/gamestate"
 )
 
 type Pool struct {
 	// TODO GameStateManager struct of some sort
 	// TODO should be some kind of GameState message, not Message
+    Game            *gamestate.GameState
 	GameStateChange chan Message
 	Players         []*Player
-	PlayerReady    chan PlayerReadyMessage
-	PlayerFire    chan PlayerFireMessage
+	PlayerReady     chan PlayerReadyMessage
+	PlayerFire      chan PlayerFireMessage
 	Register        chan *Player
 }
 
@@ -46,7 +48,19 @@ func (pool *Pool) Start() {
 		case message := <-pool.PlayerReady:
 			fmt.Println("Handling PlayerReady")
 
-			// TODO pass to GameState
+            // all players ready? start game
+            ready := true
+			for _, player := range pool.Players {
+              if !player.Ready {
+                ready = false
+              }
+			}
+
+            if ready {
+              pool.Game = gamestate.StartGame(pool.Players)
+            }
+
+			// TODO pass to players
 			log.Println(message)
 
 			break

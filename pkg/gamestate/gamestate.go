@@ -3,6 +3,7 @@ package gamestate
 import (
 	"fmt"
 	"golang.org/x/exp/slices"
+    "shipple/bshipple/pkg/websocket"
 )
 
 type Location struct {
@@ -19,23 +20,26 @@ type Board struct {
 }
 
 type GameState struct {
-	Player1 string
+	Player1 websocket.Player
 	Board1 Board
 	Player2 string
-	Board2 Board
+	Board2 websocket.Player
 }
 
+// run when both players are ready
+func StartGame(players *[]websocket.Player) {
+    player1 := players[0]
+    player2 := players[1]
 
-func StartGame(player1 string, player1Ships *[]Location, player2 string, player2Ships *[]Location) *GameState {
-	board1 := createBoard(player1Ships)
-	board2 := createBoard(player2Ships)
+	board1 := createBoard(player1.Locations)
+	board2 := createBoard(player2.Locations)
 
 	state := &GameState{Player1: player1, Board1: *board1, Player2: player2, Board2: *board2}
 
 	return state
 }
 
-func Fire(state *GameState, location *Location, player string) *GameState {
+func Fire(state *GameState, location *Location, player *Player) *GameState {
 	if state.Player1 == player {
 		state.Board2.Locations[*location] = LocationState{
 			Ship: state.Board2.Locations[*location].Ship,

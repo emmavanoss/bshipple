@@ -13,11 +13,12 @@ type Player struct {
 	ID   string
 	Conn *websocket.Conn
 	Pool *Pool
+    Ready bool
+    Locations []gamestate.Location
 }
 
 type PlayerReadyMessage struct {
   Player *Player
-  Locations []gamestate.Location
 }
 
 type PlayerFireMessage struct {
@@ -64,8 +65,12 @@ func (c *Player) Read() {
           locations[0] = gamestate.Location{X: decodedBody.Battleships[0][0], Y: decodedBody.Battleships[0][1]}
           locations[1] = gamestate.Location{X: decodedBody.Battleships[1][0], Y: decodedBody.Battleships[0][1]}
 
-          // send player and locations to the PlayerStart channel
-          message := PlayerReadyMessage{Player: c, Locations: locations}
+          // update player state
+          c.Ready = true
+          c.Locations = locations
+
+          // send player to the PlayerStart channel
+          message := PlayerReadyMessage{Player: c}
           c.Pool.PlayerReady <- message
           // pp.Print(message)
         case "fire":
@@ -76,7 +81,5 @@ func (c *Player) Read() {
         default:
           return
         }
-
-        // TODO  fire
 	}
 }
